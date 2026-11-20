@@ -1,0 +1,12 @@
+# The chat client for the Strong or Weak exercise, on port 1001.
+# The agent workspace is in ./workspace, and runs on port 1002.
+services:
+  chat_client:
+    image: "ghcr.io/skiller-whale/bedrock-chat-client:v0.1.9"
+    volumes:
+      - ./chat-logs:/app/logging
+    ports:
+      - 1001:3000
+    environment:
+      ATTENDANCE_ID: "${SW_ATTENDANCE_ID}"
+      NEXT_TELEMETRY_DISABLED: 1
