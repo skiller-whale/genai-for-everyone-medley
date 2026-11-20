@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chat</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="side">
+        <div class="brand"><span class="dot">AI</span><span id="brand">Chat</span></div>
+        <button class="newchat" id="newchat" type="button">+ New chat</button>
+        <h4>Chats</h4>
+        <nav class="list" id="convlist" aria-label="Chats"></nav>
+      </aside>
+      <main class="main">
+        <div class="mobbar">
+          <select id="mobsel" aria-label="Chats"></select>
+          <button class="newchat" id="mobnew" type="button">+ New</button>
+        </div>
+        <div class="thread" id="thread" aria-live="polite"></div>
+        <div class="composer">
+          <form class="box" id="form">
+            <textarea id="input" rows="2" placeholder="Ask anything" aria-label="Message"></textarea>
+            <div class="toolrow">
+              <button class="toggle" id="tools" type="button" aria-pressed="false" hidden title="Let the AI use a calculator in this chat">
+                <span class="sw"></span>Enable calculator tool
+              </button>
+              <button class="send" id="send" type="submit" aria-label="Send">↑</button>
+            </div>
+          </form>
+          <div class="hint" id="hint"></div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="./app.ts"></script>
+  </body>
+</html>

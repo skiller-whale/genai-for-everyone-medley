@@ -1,0 +1,17 @@
+{
+  "title": "Chat",
+  "welcome": "What would you like to ask?",
+  "footer": "This AI has no tools and no internet access. Check anything important.",
+  "footerWithTools": "The calculator tool is on in this chat. The AI still has no internet access.",
+  "model": "eu.amazon.nova-pro-v1:0",
+  "tools": ["calculator"],
+  "suggestions": [
+    { "title": "Romeo and Juliet", "prompt": "Summarise the plot of Romeo and Juliet in two sentences." },
+    { "title": "A polite rewrite", "prompt": "Rewrite this message so it is polite and professional:\n\"meeting is cancelled AGAIN, not my fault, stop emailing me about it\"" },
+    { "title": "Counting letters", "prompt": "How many times does the letter \"s\" appear in the word \"possessions\"?" },
+    { "title": "Multiplication", "prompt": "What is 3557 × 4289?" },
+    { "title": "Yesterday's news", "prompt": "What happened in the news yesterday?" },
+    { "title": "A Chesterton quote", "prompt": "Quote a passage from G K Chesterton describing early rail travel." },
+    { "title": "An original poem", "prompt": "Write a genuinely original poem." }
+  ]
+}

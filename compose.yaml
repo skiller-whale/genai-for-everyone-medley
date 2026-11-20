@@ -1,12 +1,25 @@
 # The chat client for the Strong or Weak exercise, on port 1001.
 # The agent workspace is in ./workspace, and runs on port 1002.
 services:
-  chat_client:
-    image: "ghcr.io/skiller-whale/bedrock-chat-client:v0.1.9"
-    volumes:
-      - ./chat-logs:/app/logging
+  chat:
+    build: ./chat
+    restart: unless-stopped
     ports:
-      - 1001:3000
+      - "1001:3000"
+    volumes:
+      - ./chat-config.json:/app/config.json:ro
+      - ./chat-data:/app/data
+      - chat_coach:/app/coach_sync
     environment:
-      ATTENDANCE_ID: "${SW_ATTENDANCE_ID}"
-      NEXT_TELEMETRY_DISABLED: 1
+      # The Skiller Whale Bedrock proxy is keyed by the attendance id.
+      ATTENDANCE_ID: "${SW_ATTENDANCE_ID:-}"
+      COACH_SYNC_DIR: /app/coach_sync
+      # Set MOCK_MODEL=1 to try the app without the proxy.
+      MOCK_MODEL: "${MOCK_MODEL:-}"
+
+volumes:
+  # The agent workspace's coach sync volume (workspace/compose.yaml). Its sync
+  # service sends the coach every .md file here, so CHAT.md goes too. Only one
+  # sync can run per VM, as each listens on port 9494.
+  chat_coach:
+    name: cowork_coach_sync
