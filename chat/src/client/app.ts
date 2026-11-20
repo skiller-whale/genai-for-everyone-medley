@@ -147,6 +147,7 @@ function renderThread() {
 }
 
 function bodyHtml(v: Version): string {
+  if (!v.done && !v.text && !v.error) return '<span class="thinking" aria-label="Thinking"><i></i><i></i><i></i></span>';
   const html = v.text ? marked.parse(v.text, { async: false }) : '';
   return html + (v.error ? `<p class="err">${escapeHtml(v.error)}</p>` : '');
 }
@@ -163,7 +164,7 @@ function msgEl(m: Msg, last: boolean): HTMLElement {
   const cur = m.versions[m.v];
   const body = d.querySelector<HTMLElement>('.body')!;
   body.innerHTML = bodyHtml(cur);
-  if (!cur.done) body.classList.add('cursor');
+  if (!cur.done && cur.text) body.classList.add('cursor');
   if (cur.tool) {
     for (const line of cur.tool.split('; ')) {
       const chip = document.createElement('div');
@@ -256,6 +257,15 @@ async function reply(m: Msg & { role: 'assistant' }) {
   renderAll();
 
   const body = () => (chat === active ? $('thread').querySelector<HTMLElement>('.msg.ai:last-child .body') : null);
+  const draw = () => {
+    const b = body();
+    if (!b) return;
+    b.innerHTML = bodyHtml(ver);
+    b.classList.toggle('cursor', !!ver.text);
+    const th = $('thread');
+    th.scrollTop = th.scrollHeight;
+  };
+
   const request: ChatRequest = { chatId: chat.id, title: chat.title, tools: chat.tools, history: history(chat, at) };
   try {
     const res = await fetch('/api/chat', {
@@ -285,12 +295,7 @@ async function reply(m: Msg & { role: 'assistant' }) {
         else if (ev.type === 'error') ver.error = ev.message;
       }
       if (toolSeen) renderThread();
-      const b = body();
-      if (b) {
-        b.innerHTML = bodyHtml(ver);
-        const th = $('thread');
-        th.scrollTop = th.scrollHeight;
-      }
+      draw();
     }
   } catch (err) {
     if (!streaming?.signal.aborted) ver.error = `Couldn't get a reply (${err instanceof Error ? err.message : err}). Try again.`;

@@ -75,25 +75,45 @@ function write(dir: string, name: string, contents: string) {
   renameSync(tmp, join(dir, name));
 }
 
-const oneLine = (text: string, max = 300) => {
-  const flat = text.replace(/\s+/g, ' ').trim();
-  return flat.length > max ? `${flat.slice(0, max - 1)}…` : flat;
-};
+/** Hard-wraps each line at `width`, keeping the text's own line breaks and indents. */
+export function wrap(text: string, width = 80): string {
+  const out: string[] = [];
+  for (const line of text.replace(/\r\n?/g, '\n').trimEnd().split('\n')) {
+    const indent = /^\s*(?:[-*+] |\d+[.)] |> )?/.exec(line)![0];
+    // Continuation lines line up under the text, after any list or quote marker.
+    const hang = indent.startsWith('>') ? '> ' : ' '.repeat(indent.length);
+    let cur = indent;
+    let empty = true;
+    for (const word of line.slice(indent.length).split(/ +/)) {
+      if (!word) continue;
+      if (!empty && cur.length + 1 + word.length > width) {
+        out.push(cur);
+        cur = hang + word;
+      } else cur = empty ? cur + word : `${cur} ${word}`;
+      empty = false;
+    }
+    out.push(cur.trimEnd());
+  }
+  return out.join('\n');
+}
 
 export function coachSummary(chats: LoggedChat[]): string {
   const lines = ['# Chat: everything this learner has asked', ''];
   if (!chats.length) lines.push('No chats yet.');
   chats.forEach((chat, i) => {
-    lines.push(`## ${i + 1}. ${oneLine(chat.title, 60)}${chat.tools ? ' (calculator on)' : ''}`, '');
+    lines.push(`## ${i + 1}. ${chat.title.replace(/\s+/g, ' ')}${chat.tools ? ' (calculator on)' : ''}`, '');
     for (const turn of chat.turns) {
-      lines.push(`> ${oneLine(turn.user)}`, '');
-      const many = turn.attempts.length > 1;
+      lines.push('**Learner:**', '', wrap(turn.user), '');
       turn.attempts.forEach((a, k) => {
-        const label = many ? `attempt ${k + 1}: ` : '';
-        const tool = a.tool ? `[${a.tool}] ` : '';
-        lines.push(`- ${label}${tool}${oneLine(a.text) || '(empty)'}${a.stopped ? ' (stopped)' : ''} _(${a.tokens} tokens)_`);
+        const notes = [
+          turn.attempts.length > 1 ? `attempt ${k + 1} of ${turn.attempts.length}` : '',
+          `${a.tokens} tokens`,
+          a.stopped ? 'stopped' : '',
+        ].filter(Boolean);
+        lines.push(`**AI** (${notes.join(', ')}):`, '');
+        if (a.tool) lines.push(...a.tool.split('; ').map((t) => `\`${t}\``), '');
+        lines.push(wrap(a.text) || '(empty)', '');
       });
-      lines.push('');
     }
   });
   return lines.join('\n');
